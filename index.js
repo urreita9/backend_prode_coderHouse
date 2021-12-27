@@ -1,10 +1,17 @@
 const express = require('express');
+const { dbConnection } = require('./database/config');
 require('dotenv').config();
 
 const app = express();
 
+//Database
+dbConnection();
+
 //Public
 app.use(express.static('public'));
+
+//Body Parse
+app.use(express.json());
 
 //Routes
 app.use('/api/auth', require('./routes/auth'));
