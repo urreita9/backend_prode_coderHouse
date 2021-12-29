@@ -14,7 +14,7 @@ const router = Router();
 router.use(validateJWT);
 
 //Get Picks
-router.get('/', [], getPicks);
+router.get('/', getPicks);
 
 //Create Pick
 router.post(
