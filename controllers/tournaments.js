@@ -2,7 +2,11 @@ const { response } = require('express');
 const Tournament = require('../models/Tournament');
 
 const getTournaments = async (req, res = response) => {
-	const tournament = await Tournament.find().populate('users', 'name');
+	const tournamentId = req.params.id;
+	const tournament = await Tournament.findById(tournamentId).populate(
+		'users',
+		'name'
+	);
 
 	res.json({
 		ok: true,
