@@ -14,6 +14,10 @@ const UserSchema = Schema({
 		type: String,
 		required: true,
 	},
+	verified: {
+		type: Boolean,
+		default: false,
+	},
 });
 
 module.exports = model('User', UserSchema);

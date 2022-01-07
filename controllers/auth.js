@@ -1,5 +1,6 @@
 const { response } = require('express');
 const bcrypt = require('bcryptjs');
+const sendEmail = require('../helpers/nodeMailer');
 const User = require('../models/User');
 const { generateJWT } = require('../helpers/jwt');
 
@@ -26,11 +27,18 @@ const createUser = async (req, res = response) => {
 		//JWT
 		const token = await generateJWT(user.id, user.name);
 
+		//Email verification
+		const message = `Please, click on this link to confirm your account: ${process.env.BASE_URL}/user/verify/${user.id}/${token}`;
+		await sendEmail(user.email, 'Verify Email Prode 2022', message);
+
+		console.log('Email sent');
+
 		res.status(201).json({
 			ok: true,
 			uid: user.id,
 			name: user.name,
 			token,
+			verified: false,
 		});
 	} catch (error) {
 		console.log(error);
@@ -38,6 +46,24 @@ const createUser = async (req, res = response) => {
 			ok: false,
 			msg: 'Please contact administrator',
 		});
+	}
+};
+
+const verifyUser = async (req, res) => {
+	try {
+		const user = await User.findOne({ uid: req.params.id });
+		if (!user) return res.status(400).send('Invalid link');
+
+		const token = await Token.findOne({
+			token: req.params.token,
+		});
+		if (!token) return res.status(400).send('Invalid link');
+
+		await User.updateOne({ ...user, verified: true });
+
+		res.send('email verified sucessfully');
+	} catch (error) {
+		res.status(400).send('An error occured');
 	}
 };
 
@@ -72,6 +98,7 @@ const loginUser = async (req, res) => {
 			uid: user.id,
 			name: user.name,
 			token,
+			verified: true,
 		});
 	} catch (error) {
 		console.log(error);
@@ -95,4 +122,4 @@ const renewToken = async (req, res) => {
 	});
 };
 
-module.exports = { createUser, loginUser, renewToken };
+module.exports = { createUser, loginUser, verifyUser, renewToken };
